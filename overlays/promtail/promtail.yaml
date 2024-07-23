@@ -1,0 +1,283 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/version: 2.9.3
+    helm.sh/chart: promtail-6.15.5
+  name: promtail
+  namespace: loki
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/version: 2.9.3
+    helm.sh/chart: promtail-6.15.5
+  name: promtail
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs:
+  - get
+  - watch
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/version: 2.9.3
+    helm.sh/chart: promtail-6.15.5
+  name: promtail
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: promtail
+subjects:
+- kind: ServiceAccount
+  name: promtail
+  namespace: loki
+---
+apiVersion: v1
+data:
+  promtail.yaml: |
+    c2VydmVyOgogIGxvZ19sZXZlbDogaW5mbwogIGxvZ19mb3JtYXQ6IGxvZ2ZtdAogIGh0dH
+    BfbGlzdGVuX3BvcnQ6IDMxMDEKCmNsaWVudHM6CiAgLSB1cmw6IGh0dHA6Ly9sb2tpOjMx
+    MDAvbG9raS9hcGkvdjEvcHVzaAoKcG9zaXRpb25zOgogIGZpbGVuYW1lOiAvcnVuL3Byb2
+    10YWlsL3Bvc2l0aW9ucy55YW1sCgpzY3JhcGVfY29uZmlnczoKICAjIFNlZSBhbHNvIGh0
+    dHBzOi8vZ2l0aHViLmNvbS9ncmFmYW5hL2xva2kvYmxvYi9tYXN0ZXIvcHJvZHVjdGlvbi
+    9rc29ubmV0L3Byb210YWlsL3NjcmFwZV9jb25maWcubGlic29ubmV0IGZvciByZWZlcmVu
+    Y2UKICAjIFRoaXMgaXMgdGhlIGRlZmF1bHQgam9iCiAgLSBqb2JfbmFtZToga3ViZXJuZX
+    Rlcy1wb2RzCiAgICBwaXBlbGluZV9zdGFnZXM6CiAgICAgIC0gZG9ja2VyOiB7IH0KICAg
+    ICAgLSBjcmk6IHsgfQogICAga3ViZXJuZXRlc19zZF9jb25maWdzOgogICAgICAtIHJvbG
+    U6IHBvZAogICAgcmVsYWJlbF9jb25maWdzOgogICAgICAtIHNvdXJjZV9sYWJlbHM6CiAg
+    ICAgICAgICAtIF9fbWV0YV9rdWJlcm5ldGVzX3BvZF9jb250cm9sbGVyX25hbWUKICAgIC
+    AgICByZWdleDogKFswLTlhLXotLl0rPykoLVswLTlhLWZdezgsMTB9KT8KICAgICAgICBh
+    Y3Rpb246IHJlcGxhY2UKICAgICAgICB0YXJnZXRfbGFiZWw6IF9fdG1wX2NvbnRyb2xsZX
+    JfbmFtZQogICAgICAtIHNvdXJjZV9sYWJlbHM6CiAgICAgICAgICAtIF9fbWV0YV9rdWJl
+    cm5ldGVzX3BvZF9sYWJlbF9hcHBfa3ViZXJuZXRlc19pb19uYW1lCiAgICAgICAgICAtIF
+    9fbWV0YV9rdWJlcm5ldGVzX3BvZF9sYWJlbF9hcHAKICAgICAgICAgIC0gX190bXBfY29u
+    dHJvbGxlcl9uYW1lCiAgICAgICAgICAtIF9fbWV0YV9rdWJlcm5ldGVzX3BvZF9uYW1lCi
+    AgICAgICAgcmVnZXg6IF47KihbXjtdKykoOy4qKT8kCiAgICAgICAgYWN0aW9uOiByZXBs
+    YWNlCiAgICAgICAgdGFyZ2V0X2xhYmVsOiBhcHAKICAgICAgLSBhY3Rpb246IGRyb3AKIC
+    AgICAgICByZWdleDogJyhzaGlueXByb3h5KXwoc2hpbnlwcm94eS1vcGVyYXRvciknCiAg
+    ICAgICAgc291cmNlX2xhYmVsczoKICAgICAgICAgIC0gYXBwCiAgICAgIC0gc291cmNlX2
+    xhYmVsczoKICAgICAgICAgIC0gX19tZXRhX2t1YmVybmV0ZXNfcG9kX2xhYmVsX2FwcF9r
+    dWJlcm5ldGVzX2lvX2luc3RhbmNlCiAgICAgICAgICAtIF9fbWV0YV9rdWJlcm5ldGVzX3
+    BvZF9sYWJlbF9pbnN0YW5jZQogICAgICAgIHJlZ2V4OiBeOyooW147XSspKDsuKik/JAog
+    ICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgIHRhcmdldF9sYWJlbDogaW5zdGFuY2
+    UKICAgICAgLSBzb3VyY2VfbGFiZWxzOgogICAgICAgICAgLSBfX21ldGFfa3ViZXJuZXRl
+    c19wb2RfbGFiZWxfYXBwX2t1YmVybmV0ZXNfaW9fY29tcG9uZW50CiAgICAgICAgICAtIF
+    9fbWV0YV9rdWJlcm5ldGVzX3BvZF9sYWJlbF9jb21wb25lbnQKICAgICAgICByZWdleDog
+    XjsqKFteO10rKSg7LiopPyQKICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICB0YX
+    JnZXRfbGFiZWw6IGNvbXBvbmVudAogICAgICAtIGFjdGlvbjogcmVwbGFjZQogICAgICAg
+    IHNvdXJjZV9sYWJlbHM6CiAgICAgICAgICAtIF9fbWV0YV9rdWJlcm5ldGVzX3BvZF9ub2
+    RlX25hbWUKICAgICAgICB0YXJnZXRfbGFiZWw6IG5vZGVfbmFtZQogICAgICAtIGFjdGlv
+    bjogcmVwbGFjZQogICAgICAgIHNvdXJjZV9sYWJlbHM6CiAgICAgICAgICAtIF9fbWV0YV
+    9rdWJlcm5ldGVzX25hbWVzcGFjZQogICAgICAgIHRhcmdldF9sYWJlbDogbmFtZXNwYWNl
+    CiAgICAgIC0gYWN0aW9uOiByZXBsYWNlCiAgICAgICAgcmVwbGFjZW1lbnQ6ICQxCiAgIC
+    AgICAgc2VwYXJhdG9yOiAvCiAgICAgICAgc291cmNlX2xhYmVsczoKICAgICAgICAgIC0g
+    bmFtZXNwYWNlCiAgICAgICAgICAtIGFwcAogICAgICAgIHRhcmdldF9sYWJlbDogam9iCi
+    AgICAgIC0gYWN0aW9uOiByZXBsYWNlCiAgICAgICAgcmVwbGFjZW1lbnQ6ICJrdWJlcm5l
+    dGVzLXBvZHMiCiAgICAgICAgdGFyZ2V0X2xhYmVsOiBqb2JfbmFtZQogICAgICAtIGFjdG
+    lvbjogcmVwbGFjZQogICAgICAgIHNvdXJjZV9sYWJlbHM6CiAgICAgICAgICAtIF9fbWV0
+    YV9rdWJlcm5ldGVzX3BvZF9uYW1lCiAgICAgICAgdGFyZ2V0X2xhYmVsOiBwb2QKICAgIC
+    AgLSBhY3Rpb246IHJlcGxhY2UKICAgICAgICBzb3VyY2VfbGFiZWxzOgogICAgICAgICAg
+    LSBfX21ldGFfa3ViZXJuZXRlc19wb2RfY29udGFpbmVyX25hbWUKICAgICAgICB0YXJnZX
+    RfbGFiZWw6IGNvbnRhaW5lcgogICAgICAtIGFjdGlvbjogcmVwbGFjZQogICAgICAgIHJl
+    cGxhY2VtZW50OiAvdmFyL2xvZy9wb2RzLyokMS8qLmxvZwogICAgICAgIHNlcGFyYXRvcj
+    ogLwogICAgICAgIHNvdXJjZV9sYWJlbHM6CiAgICAgICAgICAtIF9fbWV0YV9rdWJlcm5l
+    dGVzX3BvZF91aWQKICAgICAgICAgIC0gX19tZXRhX2t1YmVybmV0ZXNfcG9kX2NvbnRhaW
+    5lcl9uYW1lCiAgICAgICAgdGFyZ2V0X2xhYmVsOiBfX3BhdGhfXwogICAgICAtIGFjdGlv
+    bjogcmVwbGFjZQogICAgICAgIHJlZ2V4OiB0cnVlLyguKikKICAgICAgICByZXBsYWNlbW
+    VudDogL3Zhci9sb2cvcG9kcy8qJDEvKi5sb2cKICAgICAgICBzZXBhcmF0b3I6IC8KICAg
+    ICAgICBzb3VyY2VfbGFiZWxzOgogICAgICAgICAgLSBfX21ldGFfa3ViZXJuZXRlc19wb2
+    RfYW5ub3RhdGlvbnByZXNlbnRfa3ViZXJuZXRlc19pb19jb25maWdfaGFzaAogICAgICAg
+    ICAgLSBfX21ldGFfa3ViZXJuZXRlc19wb2RfYW5ub3RhdGlvbl9rdWJlcm5ldGVzX2lvX2
+    NvbmZpZ19oYXNoCiAgICAgICAgICAtIF9fbWV0YV9rdWJlcm5ldGVzX3BvZF9jb250YWlu
+    ZXJfbmFtZQogICAgICAgIHRhcmdldF9sYWJlbDogX19wYXRoX18KICAgICAgLSBhY3Rpb2
+    46IHJlcGxhY2UKICAgICAgICBzb3VyY2VfbGFiZWxzOiBbIF9fbWV0YV9rdWJlcm5ldGVz
+    X3BvZF9hbm5vdGF0aW9uX29wZW5hbmFseXRpY3NfZXVfc3BfcmVhbG1faWQgXQogICAgIC
+    AgIHRhcmdldF9sYWJlbDogc3BfcmVhbG1faWQKICAgICAgLSBhY3Rpb246IHJlcGxhY2UK
+    ICAgICAgICBzb3VyY2VfbGFiZWxzOiBbIF9fbWV0YV9rdWJlcm5ldGVzX3BvZF9hbm5vdG
+    F0aW9uX29wZW5hbmFseXRpY3NfZXVfc3Bfc3BlY19pZCBdCiAgICAgICAgdGFyZ2V0X2xh
+    YmVsOiBzcF9zcGVjX2lkCiAgICAgIC0gYWN0aW9uOiByZXBsYWNlCiAgICAgICAgc291cm
+    NlX2xhYmVsczogWyBfX21ldGFfa3ViZXJuZXRlc19wb2RfYW5ub3RhdGlvbl9vcGVuYW5h
+    bHl0aWNzX2V1X3NwX3VzZXJfaWQgXQogICAgICAgIHRhcmdldF9sYWJlbDogc3BfdXNlcl
+    9pZAogICAgICAtIGFjdGlvbjogcmVwbGFjZQogICAgICAgIHNvdXJjZV9sYWJlbHM6IFsg
+    X19tZXRhX2t1YmVybmV0ZXNfcG9kX2Fubm90YXRpb25fb3BlbmFuYWx5dGljc19ldV9zcF
+    9wcm94eV9pZCBdCiAgICAgICAgdGFyZ2V0X2xhYmVsOiBzcF9wcm94eV9pZAogICAgICAt
+    IGFjdGlvbjogcmVwbGFjZQogICAgICAgIHNvdXJjZV9sYWJlbHM6IFsgX19tZXRhX2t1Ym
+    VybmV0ZXNfcG9kX2Fubm90YXRpb25fb3BlbmFuYWx5dGljc19ldV9zcF9hcHBfaW5zdGFu
+    Y2UgXQogICAgICAgIHRhcmdldF9sYWJlbDogc3BfcHJveHlfaW5zdGFuY2UKICAgICAgLS
+    BhY3Rpb246IHJlcGxhY2UKICAgICAgICBzb3VyY2VfbGFiZWxzOiBbIF9fbWV0YV9rdWJl
+    cm5ldGVzX3BvZF9hbm5vdGF0aW9uX29wZW5hbmFseXRpY3NfZXVfc3BfcHJveHlfY3JlYX
+    RlZF90aW1lc3RhbXAgXQogICAgICAgIHRhcmdldF9sYWJlbDogc3BfcHJveHlfY3JlYXRl
+    ZF90aW1lc3RhbXAKICAtIGpvYl9uYW1lOiBzaGlueXByb3h5LWFuZC1vcGVyYXRvci1wb2
+    RzCiAgICBwaXBlbGluZV9zdGFnZXM6CiAgICAgIC0gZG9ja2VyOiB7IH0KICAgICAgLSBj
+    cmk6IHsgfQogICAgICAtIG11bHRpbGluZToKICAgICAgICAgIGZpcnN0bGluZTogIi4qIC
+    hERUJVRyl8KElORk8pfChFUlJPUil8KFdBUk4pIgogICAga3ViZXJuZXRlc19zZF9jb25m
+    aWdzOgogICAgICAtIHJvbGU6IHBvZAogICAgcmVsYWJlbF9jb25maWdzOgogICAgICAtIH
+    NvdXJjZV9sYWJlbHM6CiAgICAgICAgICAtIF9fbWV0YV9rdWJlcm5ldGVzX3BvZF9jb250
+    cm9sbGVyX25hbWUKICAgICAgICByZWdleDogKFswLTlhLXotLl0rPykoLVswLTlhLWZdez
+    gsMTB9KT8KICAgICAgICBhY3Rpb246IHJlcGxhY2UKICAgICAgICB0YXJnZXRfbGFiZWw6
+    IF9fdG1wX2NvbnRyb2xsZXJfbmFtZQogICAgICAtIHNvdXJjZV9sYWJlbHM6CiAgICAgIC
+    AgICAtIF9fbWV0YV9rdWJlcm5ldGVzX3BvZF9sYWJlbF9hcHBfa3ViZXJuZXRlc19pb19u
+    YW1lCiAgICAgICAgICAtIF9fbWV0YV9rdWJlcm5ldGVzX3BvZF9sYWJlbF9hcHAKICAgIC
+    AgICAgIC0gX190bXBfY29udHJvbGxlcl9uYW1lCiAgICAgICAgICAtIF9fbWV0YV9rdWJl
+    cm5ldGVzX3BvZF9uYW1lCiAgICAgICAgcmVnZXg6IF47KihbXjtdKykoOy4qKT8kCiAgIC
+    AgICAgYWN0aW9uOiByZXBsYWNlCiAgICAgICAgdGFyZ2V0X2xhYmVsOiBhcHAKICAgICAg
+    LSBhY3Rpb246IGtlZXAKICAgICAgICByZWdleDogJyhzaGlueXByb3h5KXwoc2hpbnlwcm
+    94eS1vcGVyYXRvciknCiAgICAgICAgc291cmNlX2xhYmVsczoKICAgICAgICAgIC0gYXBw
+    CiAgICAgIC0gc291cmNlX2xhYmVsczoKICAgICAgICAgIC0gX19tZXRhX2t1YmVybmV0ZX
+    NfcG9kX2xhYmVsX2FwcF9rdWJlcm5ldGVzX2lvX2luc3RhbmNlCiAgICAgICAgICAtIF9f
+    bWV0YV9rdWJlcm5ldGVzX3BvZF9sYWJlbF9pbnN0YW5jZQogICAgICAgIHJlZ2V4OiBeOy
+    ooW147XSspKDsuKik/JAogICAgICAgIGFjdGlvbjogcmVwbGFjZQogICAgICAgIHRhcmdl
+    dF9sYWJlbDogaW5zdGFuY2UKICAgICAgLSBzb3VyY2VfbGFiZWxzOgogICAgICAgICAgLS
+    BfX21ldGFfa3ViZXJuZXRlc19wb2RfbGFiZWxfYXBwX2t1YmVybmV0ZXNfaW9fY29tcG9u
+    ZW50CiAgICAgICAgICAtIF9fbWV0YV9rdWJlcm5ldGVzX3BvZF9sYWJlbF9jb21wb25lbn
+    QKICAgICAgICByZWdleDogXjsqKFteO10rKSg7LiopPyQKICAgICAgICBhY3Rpb246IHJl
+    cGxhY2UKICAgICAgICB0YXJnZXRfbGFiZWw6IGNvbXBvbmVudAogICAgICAtIGFjdGlvbj
+    ogcmVwbGFjZQogICAgICAgIHNvdXJjZV9sYWJlbHM6CiAgICAgICAgICAtIF9fbWV0YV9r
+    dWJlcm5ldGVzX3BvZF9ub2RlX25hbWUKICAgICAgICB0YXJnZXRfbGFiZWw6IG5vZGVfbm
+    FtZQogICAgICAtIGFjdGlvbjogcmVwbGFjZQogICAgICAgIHNvdXJjZV9sYWJlbHM6CiAg
+    ICAgICAgICAtIF9fbWV0YV9rdWJlcm5ldGVzX25hbWVzcGFjZQogICAgICAgIHRhcmdldF
+    9sYWJlbDogbmFtZXNwYWNlCiAgICAgIC0gYWN0aW9uOiByZXBsYWNlCiAgICAgICAgcmVw
+    bGFjZW1lbnQ6ICQxCiAgICAgICAgc2VwYXJhdG9yOiAvCiAgICAgICAgc291cmNlX2xhYm
+    VsczoKICAgICAgICAgIC0gbmFtZXNwYWNlCiAgICAgICAgICAtIGFwcAogICAgICAgIHRh
+    cmdldF9sYWJlbDogam9iCiAgICAgIC0gYWN0aW9uOiByZXBsYWNlCiAgICAgICAgcmVwbG
+    FjZW1lbnQ6ICJzaGlueXByb3h5LWFuZC1vcGVyYXRvci1wb2RzIgogICAgICAgIHRhcmdl
+    dF9sYWJlbDogam9iX25hbWUKICAgICAgLSBhY3Rpb246IHJlcGxhY2UKICAgICAgICBzb3
+    VyY2VfbGFiZWxzOgogICAgICAgICAgLSBfX21ldGFfa3ViZXJuZXRlc19wb2RfbmFtZQog
+    ICAgICAgIHRhcmdldF9sYWJlbDogcG9kCiAgICAgIC0gYWN0aW9uOiByZXBsYWNlCiAgIC
+    AgICAgc291cmNlX2xhYmVsczoKICAgICAgICAgIC0gX19tZXRhX2t1YmVybmV0ZXNfcG9k
+    X2NvbnRhaW5lcl9uYW1lCiAgICAgICAgdGFyZ2V0X2xhYmVsOiBjb250YWluZXIKICAgIC
+    AgLSBhY3Rpb246IHJlcGxhY2UKICAgICAgICByZXBsYWNlbWVudDogL3Zhci9sb2cvcG9k
+    cy8qJDEvKi5sb2cKICAgICAgICBzZXBhcmF0b3I6IC8KICAgICAgICBzb3VyY2VfbGFiZW
+    xzOgogICAgICAgICAgLSBfX21ldGFfa3ViZXJuZXRlc19wb2RfdWlkCiAgICAgICAgICAt
+    IF9fbWV0YV9rdWJlcm5ldGVzX3BvZF9jb250YWluZXJfbmFtZQogICAgICAgIHRhcmdldF
+    9sYWJlbDogX19wYXRoX18KICAgICAgLSBhY3Rpb246IHJlcGxhY2UKICAgICAgICByZWdl
+    eDogdHJ1ZS8oLiopCiAgICAgICAgcmVwbGFjZW1lbnQ6IC92YXIvbG9nL3BvZHMvKiQxLy
+    oubG9nCiAgICAgICAgc2VwYXJhdG9yOiAvCiAgICAgICAgc291cmNlX2xhYmVsczoKICAg
+    ICAgICAgIC0gX19tZXRhX2t1YmVybmV0ZXNfcG9kX2Fubm90YXRpb25wcmVzZW50X2t1Ym
+    VybmV0ZXNfaW9fY29uZmlnX2hhc2gKICAgICAgICAgIC0gX19tZXRhX2t1YmVybmV0ZXNf
+    cG9kX2Fubm90YXRpb25fa3ViZXJuZXRlc19pb19jb25maWdfaGFzaAogICAgICAgICAgLS
+    BfX21ldGFfa3ViZXJuZXRlc19wb2RfY29udGFpbmVyX25hbWUKICAgICAgICB0YXJnZXRf
+    bGFiZWw6IF9fcGF0aF9fCiAgICAgIC0gYWN0aW9uOiByZXBsYWNlCiAgICAgICAgc291cm
+    NlX2xhYmVsczogWyBfX21ldGFfa3ViZXJuZXRlc19wb2RfbGFiZWxfb3BlbmFuYWx5dGlj
+    c19ldV9zcF9yZWFsbV9pZCBdCiAgICAgICAgdGFyZ2V0X2xhYmVsOiBzcF9yZWFsbV9pZA
+    ogICAgICAtIGFjdGlvbjogcmVwbGFjZQogICAgICAgIHNvdXJjZV9sYWJlbHM6IFsgX19t
+    ZXRhX2t1YmVybmV0ZXNfcG9kX2xhYmVsX29wZW5hbmFseXRpY3NfZXVfc3BfaW5zdGFuY2
+    UgXQogICAgICAgIHRhcmdldF9sYWJlbDogc3BfaW5zdGFuY2UKCmxpbWl0c19jb25maWc6
+    Cgp0cmFjaW5nOgogIGVuYWJsZWQ6IGZhbHNlCg==
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/version: 2.9.3
+    helm.sh/chart: promtail-6.15.5
+  name: promtail
+  namespace: loki
+type: Opaque
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/version: 2.9.3
+    helm.sh/chart: promtail-6.15.5
+  name: promtail
+  namespace: loki
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: promtail
+  template:
+    metadata:
+      annotations:
+        checksum/config: 2ef0f14afc8ed4b72495a244ef20e42a4bc14afd488033fe94e04c341b97529a
+      labels:
+        app.kubernetes.io/name: promtail
+    spec:
+      containers:
+      - args:
+        - -config.file=/etc/promtail/promtail.yaml
+        env:
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        image: docker.io/grafana/promtail:2.9.5
+        imagePullPolicy: IfNotPresent
+        name: promtail
+        ports:
+        - containerPort: 3101
+          name: http-metrics
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /ready
+            port: http-metrics
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /etc/promtail
+          name: config
+        - mountPath: /run/promtail
+          name: run
+        - mountPath: /var/lib/docker/containers
+          name: containers
+          readOnly: true
+        - mountPath: /var/log/pods
+          name: pods
+          readOnly: true
+      enableServiceLinks: true
+      securityContext:
+        runAsGroup: 0
+        runAsUser: 0
+      serviceAccountName: promtail
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+        operator: Exists
+      volumes:
+      - name: config
+        secret:
+          secretName: promtail
+      - hostPath:
+          path: /run/promtail
+        name: run
+      - hostPath:
+          path: /var/lib/docker/containers
+        name: containers
+      - hostPath:
+          path: /var/log/pods
+        name: pods
+  updateStrategy: {}

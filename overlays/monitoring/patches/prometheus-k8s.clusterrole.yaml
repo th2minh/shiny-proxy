@@ -1,0 +1,25 @@
+- op: add
+  path: /rules/-
+  value:
+    apiGroups:
+      - ""
+    resources:
+      - pods
+      - endpoints
+      - services
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+
+- op: add
+  path: /rules/-
+  value:
+    apiGroups:
+      - monitoring.coreos.com
+    resources:
+        - servicemonitors
+    verbs:
+      - "get"
+      - "list"
+      - "watch"

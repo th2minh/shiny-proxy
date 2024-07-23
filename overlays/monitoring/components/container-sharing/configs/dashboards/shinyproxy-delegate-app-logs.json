@@ -1,0 +1,314 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "$$hashKey": "object:36",
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 32,
+  "iteration": 1702304513303,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "dateTimeAsSystem"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^value$/",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.5.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "expr": "{sp_realm_id=~\".+\", namespace=\"$namespace\", sp_realm_id=\"$realm\", sp_user_id=\"$user\", sp_spec_id=\"$app\", sp_proxy_instance=\"$instance\", sp_proxy_id=\"$id\"} ",
+          "maxLines": 1,
+          "refId": "A"
+        }
+      ],
+      "title": "App creation time",
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "keepLabels": [
+              "sp_proxy_created_timestamp"
+            ],
+            "mode": "rows",
+            "valueLabel": "sp_proxy_created_timestamp"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 27,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "id": 2,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Ascending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "expr": "{sp_realm_id=~\".+\", namespace=\"$namespace\", sp_realm_id=\"$realm\", sp_spec_id=\"$app\", sp_proxy_id=\"$id\", sp_proxy_id!=\"\"} | line_format `[App]: {{ __line__ }}` ",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "expr": "{app=\"shinyproxy\", namespace=\"$namespace\", sp_realm_id=\"$realm\"} | json | delegateProxyId=\"$id\" | line_format `[ShinyProxy] {{.level}}: {{.message}} {{.stack_trace}}`",
+          "hide": false,
+          "legendFormat": "",
+          "refId": "B"
+        }
+      ],
+      "title": "Logs",
+      "type": "logs"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${prometheus}"
+        },
+        "definition": "label_values(shinyproxy:delegate_app:annotations{annotation_openanalytics_eu_sp_realm_id=~\".+\"}, namespace)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "query": "label_values(shinyproxy:delegate_app:annotations{annotation_openanalytics_eu_sp_realm_id=~\".+\"}, namespace)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 5,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${prometheus}"
+        },
+        "definition": "label_values(shinyproxy:delegate_app:annotations{job=~\".+\",namespace=~\"$namespace\"}, annotation_openanalytics_eu_sp_realm_id)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "realm",
+        "options": [],
+        "query": {
+          "query": "label_values(shinyproxy:delegate_app:annotations{job=~\".+\",namespace=~\"$namespace\"}, annotation_openanalytics_eu_sp_realm_id)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 5,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${prometheus}"
+        },
+        "definition": "label_values(shinyproxy:delegate_app:annotations{job=~\".+\",namespace=~\"$namespace\", annotation_openanalytics_eu_sp_realm_id=\"$realm\"}, annotation_openanalytics_eu_sp_spec_id)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "app",
+        "options": [],
+        "query": {
+          "query": "label_values(shinyproxy:delegate_app:annotations{job=~\".+\",namespace=~\"$namespace\", annotation_openanalytics_eu_sp_realm_id=\"$realm\"}, annotation_openanalytics_eu_sp_spec_id)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 5,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${prometheus}"
+        },
+        "definition": "label_values(shinyproxy:delegate_app:annotations{job=~\".+\",namespace=~\"$namespace\", annotation_openanalytics_eu_sp_realm_id=\"$realm\",annotation_openanalytics_eu_sp_spec_id=\"$app\"}, annotation_openanalytics_eu_sp_proxy_id)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "id",
+        "options": [],
+        "query": {
+          "query": "label_values(shinyproxy:delegate_app:annotations{job=~\".+\",namespace=~\"$namespace\", annotation_openanalytics_eu_sp_realm_id=\"$realm\",annotation_openanalytics_eu_sp_spec_id=\"$app\"}, annotation_openanalytics_eu_sp_proxy_id)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 5,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {},
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "loki",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {},
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "prometheus",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 5,
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "timezone": "browser",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "ShinyProxy Delegate App Logs",
+  "uid": "shinyproxy-delegate-app-logs",
+  "version": 3,
+  "weekStart": ""
+}

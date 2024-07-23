@@ -1,0 +1,108 @@
+apiVersion: openanalytics.eu/v1
+kind: ShinyProxy
+metadata:
+  name: shinyproxy1
+spec:
+  management:
+    metrics:
+      export:
+        prometheus:
+          enabled: true
+  server:
+    forward-headers-strategy: native
+    servlet:
+      context-path: /shinyproxy1
+  spring:
+    session:
+      store-type: redis
+    redis:
+      password: ${REDIS_PASSWORD}
+      sentinel:
+        master: shinyproxy
+        password: ${REDIS_PASSWORD}
+        nodes: redis-node-0.redis-headless:26379, redis-node-1.redis-headless:26379, redis-node-2.redis-headless:26379
+  proxy:
+    usage-stats-url: micrometer
+    store-mode: Redis
+    defaultMaxInstances: -1
+    title: Open Analytics Shiny Proxy
+    logo-url: https://www.openanalytics.eu/shinyproxy/logo.png
+    log-as-json: true
+    landingPage: /
+    containerBackend: kubernetes
+    kubernetes:
+      namespace: shinyproxy-operator
+      internal-networking: true
+      image-pull-policy: Always
+    authentication: simple
+    admin-groups: scientists
+    users:
+    - name: jack
+      password: password
+      groups: scientists
+    - name: jeff
+      password: password
+      groups: mathematicians
+    specs:
+      - id: rstudio
+        display-name: RStudio
+        container-image: openanalytics/shinyproxy-rstudio-ide-demo:1.4.1106__4.0.4
+        container-env:
+          DISABLE_AUTH: true
+          WWW_ROOT_PATH: "#{proxy.getRuntimeValue('SHINYPROXY_PUBLIC_PATH')}"
+        port: 8787
+        max-instances: 5
+      - id: dash-demo
+        display-name: Dash Demo
+        port: 8050
+        container-image: openanalytics/shinyproxy-dash-demo
+        kubernetes-pod-patches: |
+          - op: replace
+            path: /metadata/namespace
+            value: shinyproxy1-app
+        target-path: "#{proxy.getRuntimeValue('SHINYPROXY_PUBLIC_PATH')}"
+      - id: 01_hello
+        display-name: Hello Application
+        description: Application which demonstrates the basics of a Shiny app 2
+        container-cmd: ["R", "-e", "shinyproxy::run_01_hello()"]
+        container-image: openanalytics/shinyproxy-demo
+        access-groups: [scientists, mathematicians]
+        minimumSeatsAvailable: 2
+      - id: 06_tabsets
+        container-cmd: ["R", "-e", "shinyproxy::run_06_tabsets()"]
+        container-image: openanalytics/shinyproxy-demo
+        access-groups: scientists
+  kubernetesPodTemplateSpecPatches: |
+    - op: add
+      path: /spec/containers/0/env/-
+      value:
+        name: REDIS_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: redis
+            key: redis-password
+    - op: add
+      path: /spec/containers/0/resources
+      value:
+        limits:
+          cpu: 1
+        requests:
+          cpu: 0.5
+    - op: add
+      path: /spec/serviceAccountName
+      value: shinyproxy-sa
+  kubernetesIngressPatches: |
+    - op: add
+      path: /metadata/annotations
+      value:
+        nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/proxy-body-size: 300m
+    - op: add
+      path: /spec/ingressClassName
+      value: nginx
+  image: openanalytics/shinyproxy:3.0.0
+  imagePullPolicy: Always
+  fqdn: 'operator-demo.local'
+  appNamespaces:
+    - shinyproxy1-app
